@@ -5,6 +5,7 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImageGalleryItem } from './ImageGallery/ImageGalleryItem/ImageGalleryItem';
 import { Button } from './Button/Button';
 import { Blocks } from 'react-loader-spinner';
+import { Modal } from './Modal/Modal';
 import css from './App.module.css';
 
 export class App extends Component {
@@ -15,10 +16,8 @@ export class App extends Component {
     total: 0,
     error: null,
     loader: false,
-  };
-
-  hendlSubmiForm = text => {
-    this.setState({ keyWord: text, page: 1, images: [], total: 0 });
+    openModal: false,
+    modalImage: '',
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -28,6 +27,10 @@ export class App extends Component {
       this.fetchImages(keyWord, page);
     }
   }
+
+  hendlSubmiForm = text => {
+    this.setState({ keyWord: text, page: 1, images: [], total: 0 });
+  };
 
   fetchImages = async (keyWord, page) => {
     try {
@@ -47,6 +50,13 @@ export class App extends Component {
     this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
+  toglModal = largeImage => {
+    this.setState(({ openModal }) => ({
+      openModal: !openModal,
+      modalImage: largeImage,
+    }));
+  };
+
   render() {
     return (
       <>
@@ -61,12 +71,15 @@ export class App extends Component {
                     preview={webformatURL}
                     largeImage={largeImageURL}
                     tag={tags}
+                    tgModal={this.toglModal}
                   />
                 );
               }
             )}
           </ImageGallery>
-          <Button addPhotos={this.onLoadMore} />
+          {this.state.images.length < this.state.total && (
+            <Button addPhotos={this.onLoadMore} />
+          )}
         </div>
         {this.state.loader && (
           <Blocks
@@ -75,8 +88,12 @@ export class App extends Component {
             height="80"
             width="80"
             ariaLabel="blocks-loading"
-            wrapperStyle={{}}
-            wrapperClass="blocks-wrapper"
+          />
+        )}
+        {this.state.openModal && (
+          <Modal
+            modalImage={this.state.modalImage}
+            closeModal={this.toglModal}
           />
         )}
       </>
